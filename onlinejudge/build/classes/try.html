@@ -1,0 +1,36 @@
+<html>
+    <head>
+	
+	    <link rel="stylesheet" type="text/css" href="codemirror.css">
+<link rel="stylesheet" type="text/css" href="ambiance.css">
+<link rel="stylesheet" type="text/css" href="solarized.css">
+<script type="text/javascript" src="codemirror.js"></script>
+<script type="text/javascript" src="C:\Users\Trush\Desktop\codemirror\codemirror-5.15.2\lib\php\php.js"></script>
+	
+	</head>
+	
+	<body>
+
+<textarea id="template-html" name="code" class="CodeMirror">
+
+</textarea>
+<script type="text/javascript">
+    var config, editor;
+
+    config = {
+        lineNumbers: true,
+		mode: "text/php",
+        theme: "ambiance",
+        indentWithTabs: true,
+        readOnly: false
+    };
+
+    editor = CodeMirror.fromTextArea(document.getElementById("template-html"), config);
+
+    function selectTheme() {
+        editor.setOption("theme", "solarized dark");
+    }
+    setTimeout(selectTheme, 5000);
+</script>
+</body>
+</html>

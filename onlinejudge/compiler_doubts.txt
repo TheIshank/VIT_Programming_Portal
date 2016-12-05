@@ -1,0 +1,10 @@
+Send data from php to java server.
+Run code on server.
+Send data back to php.
+Compare received output with expected output.
+Test cases passed VS Test cases failed.
+Run hidden test cases separately.
+Run code in all languages.
+Host compiler server on cloud.
+Multiple connections to the server.
+

@@ -1,0 +1,1 @@
+INSERT INTO student_tests  VALUES ('43','13bce1085','0','0')

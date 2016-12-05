@@ -1,0 +1,1 @@
+<p>Given two numbers, <b>x </b>and <b>y</b>, print the sum of the two numbers.</p><p>Input -&nbsp;</p><p>Two numbers, <b>x </b>and <b>y.</b></p><p>Output -&nbsp;</p><p>The sum of the two numbers.</p><p><b><i>Sample Input</i></b>&nbsp;</p><p>2 3</p><p><b><i>Sample Output</i></b></p><p>5</p>

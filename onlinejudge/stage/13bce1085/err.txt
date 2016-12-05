@@ -1,0 +1,3 @@
+gcc: Internal error: Aborted (program collect2)
+Please submit a full bug report.
+See <URL:http://www.mingw.org/bugs.shtml> for instructions.

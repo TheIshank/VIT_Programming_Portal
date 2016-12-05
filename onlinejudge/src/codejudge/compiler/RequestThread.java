@@ -1,0 +1,149 @@
+/*
+ * Codejudge
+ * Copyright 2012, Sankha Narayan Guria (sankha93@gmail.com)
+ * Licensed under MIT License.
+ *
+ * Codejudge Compiler Server : Thread that runs on each request
+ */
+
+package codejudge.compiler;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+import codejudge.compiler.languages.C;
+import codejudge.compiler.languages.Cpp;
+import codejudge.compiler.languages.Java;
+import codejudge.compiler.languages.Language;
+import codejudge.compiler.languages.Python;
+
+public class RequestThread extends Thread {
+	
+	Socket s; // socket connection
+	int n; // request number
+	File dir; // staging directory
+	
+	public RequestThread(Socket s, int n) {
+		this.s=s;
+		this.n=n;
+		//dir = new File("stage/" + n);
+	}
+	
+	public void run() {
+		//dir.mkdirs();  -  create staging directory
+		try {
+                    
+                        
+			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));// Create object to read content from the input stream
+			PrintWriter out = new PrintWriter(s.getOutputStream(), true); // Create object to write content to the output stream ( to be received by PHP)
+			// read input from the PHP script
+			String file = in.readLine(); // Read file name
+			int timeout = Integer.parseInt(in.readLine()); //  Read Timeout
+			String contents = in.readLine().replace("$_n_$", "\n"); // Read the solution contents
+			String input = in.readLine().replace("$_n_$", " "); 
+                     //   System.out.println("see here: " + input + "\n");
+			String lang = in.readLine(); // Read the specified programming language
+                        String id = in.readLine(); //  Read the registration number of the student
+			//System.out.println("Compiling " + file + "...");
+			// create the sample input file
+                        dir = new File("stage/" + id); // Create a new directory corresponding to the student with his/her registration number
+                        //System.out.println("id - "+id);
+                        dir.mkdirs();
+			PrintWriter writer = new PrintWriter(new FileOutputStream("stage/" + id +"/in.txt"));
+			writer.println(input); // Write the input for the code, into the file  "in.txt"
+			writer.close();
+			Language l = null;
+			// create the language specific compiler
+                        /*
+                          The specific commands for the compilation, and execution of code, for each language,
+                          can be found in the class created for each language.(c.java, Cpp.java etc..)
+                        */
+			if(lang.equals("c"))
+				l = new C(file, timeout, contents, dir.getAbsolutePath()); // New object of C class
+			else if(lang.equals("cpp"))
+				l = new Cpp(file, timeout, contents, dir.getAbsolutePath());// New object of C++ class
+			else if(lang.equals("java"))
+				l = new Java(file, timeout, contents, dir.getAbsolutePath());// New object of Java class
+			else if(lang.equals("python"))
+				l = new Python(file, timeout, contents, dir.getAbsolutePath());// New Object of Python class
+                        System.out.println("Compilation");
+                       
+			l.compile(l); // compile the file
+                        /* 
+                           Note - Every language class contains a compile() method , and  an execute(). Understanding the sequence
+                           of instructions in any of these classes should suffice. Extensive documention provided only in C.java class
+                        */
+                        
+			String errors = compileErrors();// Function reads the "err.txt" file to check if any compilation errors are there, or not.
+			if(!errors.equals("")) { // check for compilation errors
+				out.println("0");// Send "0" to PHP, indicating compilation error
+				out.println(errors); // Send the respective errors
+			} else {
+				// execute the program and return output
+                               
+                            
+                                System.out.println("l.execute() before - \n"+ l.timedout );
+                                
+                                
+				l.execute(l); // Execute the file
+                                
+                                
+                                
+                                System.out.println("l.execute() after - \n"+ l.timedout);
+				
+                                
+                                /*if(l.timedout)
+                                {  System.out.println("Sent status!");
+					out.println(2);}
+				else {
+					out.println("1");
+					out.println(execMsg());
+				}*/
+                                
+                                
+                                out.println("1"); // Send "1", indicating some output has been generated
+				out.println(execMsg()); // Send the output generated by the code
+			}
+			s.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// method to return the compiler errors ( Errors stored in err.txt )
+	public String compileErrors() {
+		String line, content = "";
+		try {
+			BufferedReader fin = new BufferedReader(new InputStreamReader(new FileInputStream(dir.getAbsolutePath() + "/err.txt")));
+			while((line = fin.readLine()) != null)
+				content += (line + "\n");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return content.trim();
+	}
+	
+	// method to return the execution output ( Output stored in out.txt )
+	public String execMsg() {
+		String line, content = "";
+		try {
+			BufferedReader fin = new BufferedReader(new InputStreamReader(new FileInputStream(dir.getAbsolutePath() + "/out.txt")));
+			while((line = fin.readLine()) != null)
+				content += (line + "\n");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return content.trim();
+	}
+}
